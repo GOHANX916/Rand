@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF ID Shop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #444;
+            background-color: #222;
+            border-radius: 10px;
+        }
+        .product {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #333;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+        }
+        img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 10px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to FF ID Shop</h1>
+    <div class="container">
+        <h2>Available Products</h2>
+        <div id="product-list"></div>
+    </div>
+
+    <script>
+        function loadProducts() {
+            fetch('http://localhost:3000/products')
+                .then(response => response.json())
+                .then(products => {
+                    const productList = document.getElementById('product-list');
+                    productList.innerHTML = '';
+
+                    products.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.classList.add('product');
+                        productDiv.innerHTML = `
+                            <img src="${product.image}" alt="${product.name}">
+                            <h3>${product.name}</h3>
+                            <p>${product.description}</p>
+                            <button onclick="buyNow('${product.id}')">Buy Now</button>
+                        `;
+                        productList.appendChild(productDiv);
+                    });
+                })
+                .catch(error => console.error("Error loading products:", error));
+        }
+
+        function buyNow(productId) {
+            window.location.href = `transaction.html?productId=${productId}`;
+        }
+
+        document.addEventListener("DOMContentLoaded", loadProducts);
+    </script>
+
+</body>
+</html>

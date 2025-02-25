@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            margin: 50px auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid #444;
+            background-color: #222;
+            border-radius: 10px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        input {
+            background-color: #333;
+            color: #fff;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Enter Transaction Details</h1>
+    <div class="container">
+        <input type="text" id="transactionId" placeholder="Transaction ID">
+        <input type="email" id="email" placeholder="Your Email">
+        <button onclick="submitTransaction()">Submit</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        function getProductId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('productId') || null; // Return null if not found
+        }
+
+        function submitTransaction() {
+            const transactionId = document.getElementById("transactionId").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const productId = getProductId();
+
+            if (!transactionId || !email) {
+                document.getElementById("status").innerText = "Transaction ID and Email are required!";
+                return;
+            }
+
+            if (!productId) {
+                document.getElementById("status").innerText = "Error: No product selected!";
+                return;
+            }
+
+            fetch('http://localhost:3000/add-transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transactionId, email, productId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("status").innerText = data.message;
+            })
+            .catch(error => {
+                console.error("Error submitting transaction:", error);
+                document.getElementById("status").innerText = "Error submitting transaction.";
+            });
+        }
+    </script>
+
+</body>
+</html>

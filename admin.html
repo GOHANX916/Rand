@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #444;
+            background-color: #222;
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: center;
+        }
+        button {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .approve {
+            background-color: #28a745;
+            color: white;
+        }
+        .reject {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Admin Panel</h1>
+    <div class="container">
+        <h2>Pending Transactions</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Email</th>
+                    <th>Product</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-list"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function loadTransactions() {
+            fetch('http://localhost:3000/transactions')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(transactions => {
+                    console.log("Loaded Transactions:", transactions);
+                    if (!Array.isArray(transactions)) {
+                        console.error("Invalid transactions format", transactions);
+                        return;
+                    }
+                    const tableBody = document.getElementById('transaction-list');
+                    tableBody.innerHTML = '';
+
+                    transactions.forEach(transaction => {
+                        if (transaction.status === "pending") {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${transaction.transactionId}</td>
+                                <td>${transaction.email}</td>
+                                <td>${transaction.productName}</td>
+                                <td>
+                                    <button class="approve" onclick="verifyTransaction('${transaction.transactionId}', true)">Approve</button>
+                                    <button class="reject" onclick="verifyTransaction('${transaction.transactionId}', false)">Reject</button>
+                                </td>
+                            `;
+                            tableBody.appendChild(row);
+                        }
+                    });
+                })
+                .catch(error => console.error("Error loading transactions:", error));
+        }
+
+        function verifyTransaction(transactionId, approve) {
+            fetch('http://localhost:3000/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transactionId, approve })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                loadTransactions();
+            })
+            .catch(error => console.error("Error verifying transaction:", error));
+        }
+
+        document.addEventListener("DOMContentLoaded", loadTransactions);
+    </script>
+
+</body>
+</html>
